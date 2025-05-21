@@ -76,3 +76,27 @@ jobs:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        - name: Check for errors
+  run: |
+    if [ $? -ne 0 ]; then
+      echo "An error occurred during the build or test phase."
+      exit 1
+    fi
+    - name: Notify Slack
+  uses: rtCamp/action-slack-notify@v2
+  env:
+    SLACK_CHANNEL: '#ci-cd'
+    SLACK_COLOR: ${{ job.status == 'success' && 'good' || 'danger' }}
+    SLACK_MESSAGE: 'Deploy to Azure WebApp ${{ job.status == 'success' && 'succeeded' || 'failed' }}'
+    SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+    - name: Cache dependencies
+  uses: actions/cache@v3
+  with:
+    path: ~/.npm
+    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+    restore-keys: |
+      ${{ runner.os }}-node-
+      - name: Run ESLint
+  run: npm run lint
+- name: Check Code Quality
+  run: npm run check-quality
