@@ -1,5 +1,5 @@
-import MemberArea from "@/templates/member-area"
+import LandingPage from "@/templates/landing-page"
 
-export default function MemberAreaPage() {
-  return <MemberArea />
+export default function Home() {
+  return <LandingPage />
 }
